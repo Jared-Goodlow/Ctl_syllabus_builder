@@ -180,7 +180,7 @@ const blank = {
   credits: "3", meeting: "", location: "", dept: "", prereq: "",
   instructor: "", email: "", office: "", hours: "", address: "",
   subjectLine: "", responseTime: "48 hours on business days",
-  description: "", welcome: "",
+  description: "", welcome: "", customDescriptions: [],
   showPrimer: true, outcomes: [""],
   texts: "", costNote: "", tech: "",
   items: [{ name: "", weight: "", desc: "", slos: [] }],
@@ -386,6 +386,10 @@ const setDeep = (k, i, key, v) => {
 
     if (d.welcome) { sec("Welcome to This Course"); h.push(para(d.welcome)); }
     if (d.description) { sec("Course Description"); h.push(para(d.description)); }
+    (d.customDescriptions || []).filter((item) => item.title.trim() || item.description.trim()).forEach((item) => {
+      sec(item.title.trim() || "Custom Course Description");
+      if (item.description.trim()) h.push(para(item.description));
+    });
 
     if (realOutcomes.length || d.showPrimer) {
       sec("Student Learning Outcomes");
@@ -612,7 +616,23 @@ const setDeep = (k, i, key, v) => {
               <A rows={6} value={d.welcome} onChange={(v) => set("welcome", v)}
                 placeholder="Foreign policy is not something that happens far away in diplomatic corridors. It shapes the price of the goods you buy, the security of the country you live in, and the reputation the United States carries around the world. This course is built around that reality." />
             </Field>
-            <Field label="Catalog description"><A rows={5} value={d.description} onChange={(v) => set("description", v)} placeholder="Paste the description from the UTM catalog." /></Field>
+            <Field label="Course description"><A rows={5} value={d.description} onChange={(v) => set("description", v)} placeholder="Paste the description from the UTM catalog." /></Field>
+            <div className="mt-6 mb-2" style={{ color: UI.navy, fontWeight: "bold", fontSize: 14 }}>Custom course descriptions</div>
+            {(d.customDescriptions || []).map((item, i) => (
+              <div key={i} className="mb-3 p-3 rounded" style={{ background: UI.paper, border: `1px solid ${UI.line}` }}>
+                <div className="flex items-start gap-2">
+                  <div style={{ flex: 1 }}>
+                    <Field label="Custom title"><T value={item.title} onChange={(v) => setDeep("customDescriptions", i, "title", v)} placeholder="Course focus, context, or special emphasis" /></Field>
+                    <Field label="Description"><A rows={6} value={item.description} onChange={(v) => setDeep("customDescriptions", i, "description", v)} placeholder="Provide a custom course description." /></Field>
+                  </div>
+                  <button type="button" onClick={() => drop("customDescriptions", i)} aria-label={`Remove custom description ${i + 1}`} title="Remove custom description"
+                    className="p-2 rounded" style={{ color: UI.slate, background: "transparent", border: 0, cursor: "pointer" }}>
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+            <Btn onClick={() => push("customDescriptions", { title: "", description: "" })} icon={Plus}>Add custom course description</Btn>
           </>)}
 
           {tab === 3 && (<>
